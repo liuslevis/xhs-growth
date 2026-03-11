@@ -5,9 +5,8 @@ Shell helpers for a Xiaohongshu account discovery workflow built around `xiaohon
 这个仓库是一组围绕 `xiaohongshu-cli` 的 Shell 脚本，主要用于：
 
 1. 按关键词搜索小红书账号
-2. 去重并汇总账号信息
-3. 拉取每个账号最近一条笔记
-4. 基于现有导出 CSV 生成下游可继续处理的文本输出
+2. 去重并汇总账号信息，拉取每个账号最近一条笔记
+4. 生成笔记下留言命令
 
 ## Current Files
 
