@@ -7,7 +7,7 @@ Usage:
   ./1_xhs_get_keyword_user_ids.sh [--out-dir DIR] [--keyword-file FILE] [keyword1 keyword2 ...]
 
 Notes:
-  - Defaults to keywords from ./xhs-user-keywords.txt when no keywords are passed.
+  - Defaults to keywords from ./xhs-edu-keywords.txt when no keywords are passed.
   - The local usage examples in this repo use `xhs search-user`. If your CLI build uses
     `xhs user-search`, set XHS_SEARCH_SUBCOMMAND=user-search before running.
 EOF
@@ -94,7 +94,7 @@ rebuild_accounts() {
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DEFAULT_OUT_DIR="$SCRIPT_DIR/output/xhs_edu_$(date '+%Y%m%d_%H%M%S')"
 OUT_DIR="$DEFAULT_OUT_DIR"
-KEYWORD_FILE="$SCRIPT_DIR/xhs-user-keywords.txt"
+KEYWORD_FILE="$SCRIPT_DIR/xhs-edu-keywords.txt"
 SLEEP_SECONDS="${SLEEP_SECONDS:-1}"
 SEARCH_SUBCOMMAND="${XHS_SEARCH_SUBCOMMAND:-search-user}"
 POSITIONAL_KEYWORDS=()

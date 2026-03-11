@@ -50,12 +50,6 @@ Run with custom keywords:
 ./1_xhs_get_keyword_user_ids.sh --out-dir ./output/latest "AI培训" "职业培训"
 ```
 
-If your local CLI build uses `xhs user-search` instead of `xhs search-user`:
-
-```bash
-export XHS_SEARCH_SUBCOMMAND=user-search
-```
-
 This step writes:
 
 - `accounts.json`
@@ -101,9 +95,7 @@ Example:
 ```bash
 ./3_xhs_get_comment_cmd.sh \
   --input ./output/xhs_edu_run_20260311_133107/manual_review.csv \
-  --output ./output/comments.txt \
-  --prefix "YYYY" \
-  --suffix "XXXX"
+  --output ./output/comments.txt
 ```
 
 The script also accepts `--search-dir` and can read matching `raw/search/*.json` files to append extra search metadata such as fan counts when available.
@@ -111,7 +103,7 @@ The script also accepts `--search-dir` and can read matching `raw/search/*.json`
 Typical output line:
 
 ```text
-YYYY  <note_id>  XXXX  # <user_name>  <note_title>  粉丝:<count>
+comment  <note_id>  -c Hi  # <user_name>  <note_title>  粉丝:<count>
 ```
 
 ## Output Layout
