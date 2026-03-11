@@ -1,175 +1,152 @@
 # xhs-growth
 
-Small shell workflow for discovering Xiaohongshu education/training accounts with `xiaohongshu-cli`, enriching them with latest-note metadata, and generating a manual review queue.
+Shell helpers for a Xiaohongshu account discovery workflow built around `xiaohongshu-cli`.
 
-一个基于 Shell 的小红书潜在客户账号发现工作流：按关键词搜索账号、补充最新笔记元数据，并生成可人工复核的清单。
+这个仓库是一组围绕 `xiaohongshu-cli` 的 Shell 脚本，主要用于：
 
-## 中文说明
+1. 按关键词搜索小红书账号
+2. 去重并汇总账号信息
+3. 拉取每个账号最近一条笔记
+4. 基于一份人工整理好的 `manual_review.csv` 生成下游可继续处理的文本输出
 
-### 项目简介
-
-这个仓库是围绕 `xiaohongshu-cli` 封装的一组 Bash 脚本，适合做轻量级账号发现和人工筛选流程。
-
-它会完成这 3 个步骤：
-
-1. 根据关键词批量搜索账号，例如 `AI培训` `小龙虾`
-2. 去重汇总为 `accounts.json` 和 `accounts.csv`
-3. 拉取每个账号的最新笔记，并生成 `manual_review.csv` / `manual_review.md`
-
-### 文件说明
-
-| 文件 | 作用 |
-| --- | --- |
-| `1_xhs_get_keyword_user_ids.sh` | 按关键词搜索账号，生成基础账号列表 |
-| `2_xhs_get_user_latest_notes.sh` | 为账号补充最新笔记信息 |
-| `xhs_prepare_manual_review.sh` | 生成人工复核队列 |
-| `xhs-user-keywords.txt` | 默认关键词列表 |
-| `output/` | 每次运行生成的结果目录 |
-
-### 依赖
-
-- `bash`
-- `xhs` CLI，并且已经可以在 `PATH` 中直接调用
-- `jq`
-- 一个可用的小红书登录态
-
-```bash
-xhs login
-xhs status
-```
-
-### 快速开始
-
-使用默认关键词采集：
-
-```bash
-./1_xhs_get_keyword_user_ids.sh
-```
-
-推荐把三步流程指向同一个输出目录：
-
-```bash
-./1_xhs_get_keyword_user_ids.sh --out-dir ./output/latest
-./2_xhs_get_user_latest_notes.sh --out-dir ./output/latest
-./xhs_prepare_manual_review.sh --out-dir ./output/latest
-```
-
-使用自定义关键词：
-
-```bash
-./1_xhs_get_keyword_user_ids.sh "AI培训" "小龙虾"
-```
-
-测试时限制补充数量和等待时间：
-
-```bash
-./2_xhs_get_user_latest_notes.sh --out-dir ./output/latest --limit 20 --sleep 1
-```
-
-如果你的本地 CLI 子命令是 `xhs user-search`，先设置：
-
-```bash
-export XHS_SEARCH_SUBCOMMAND=user-search
-```
-
-### 输出内容
-
-常见输出文件如下：
-
-- `accounts.json`：去重后的账号主数据
-- `accounts.csv`：便于筛选和导出的表格版本
-- `raw/search/*.json`：原始搜索响应
-- `raw/posts/*.json`：原始发文响应
-- `collect.log` / `enrich.log`：运行日志
-- `manual_review.csv` / `manual_review.md`：人工复核清单
-
-### 注意事项
-
-- 这些脚本默认采用 `xhs ... --json` + `jq` 的方式做结构化处理。
-- `output/` 下的结果可能包含账号元数据，分享前应先做人工检查。
-- 请自行确认你的使用方式符合平台条款、隐私要求和内部合规要求。
-
-## English
-
-### Overview
-
-This repository is not an official Xiaohongshu tool. It is a thin Bash workflow built around `xiaohongshu-cli` for lightweight account discovery and manual review.
-
-The workflow does three things:
-
-1. Search accounts by keyword, such as `AI培训`
-2. Deduplicate results into `accounts.json` and `accounts.csv`
-3. Enrich each account with its latest post metadata and build `manual_review.csv` / `manual_review.md`
-
-### Files
+## Current Files
 
 | File | Purpose |
 | --- | --- |
-| `1_xhs_get_keyword_user_ids.sh` | Search accounts by keyword and build the base account list |
-| `2_xhs_get_user_latest_notes.sh` | Enrich matched accounts with latest-note metadata |
-| `xhs_prepare_manual_review.sh` | Generate a manual review queue |
-| `xhs-user-keywords.txt` | Default keyword seed list |
+| `1_xhs_get_keyword_user_ids.sh` | Search accounts by keyword and build `accounts.json` / `accounts.csv` |
+| `2_xhs_get_user_latest_notes.sh` | Enrich each matched account with its latest note metadata |
+| `3_xhs_get_comment_cmd.sh` | Read `manual_review.csv` and render one line per note using a configurable prefix/suffix |
+| `xhs-edu-keywords.txt` | Default keyword seed list |
 | `output/` | Generated run artifacts |
 
-### Requirements
+## Requirements
 
 - `bash`
-- `xhs` CLI available in `PATH`
+- `python3`
 - `jq`
+- `xhs` CLI available in `PATH`
 - A valid Xiaohongshu login session
+
+Example:
 
 ```bash
 xhs login
 xhs status
 ```
 
-### Quick Start
+## Workflow
 
-Run collection with the default keyword list:
+### 1. Collect Accounts By Keyword
 
-```bash
-./1_xhs_get_keyword_user_ids.sh
-```
-
-Use the same output directory for the full three-step flow:
+Run with the default keyword list:
 
 ```bash
 ./1_xhs_get_keyword_user_ids.sh --out-dir ./output/latest
-./2_xhs_get_user_latest_notes.sh --out-dir ./output/latest
-./xhs_prepare_manual_review.sh --out-dir ./output/latest
 ```
 
-Use custom keywords:
+Run with custom keywords:
 
 ```bash
-./1_xhs_get_keyword_user_ids.sh "AI培训" "小龙虾"
+./1_xhs_get_keyword_user_ids.sh --out-dir ./output/latest "AI培训" "职业培训"
 ```
 
-Limit enrichment during testing:
-
-```bash
-./2_xhs_get_user_latest_notes.sh --out-dir ./output/latest --limit 20 --sleep 1
-```
-
-If your local CLI build uses `xhs user-search`, set:
+If your local CLI build uses `xhs user-search` instead of `xhs search-user`:
 
 ```bash
 export XHS_SEARCH_SUBCOMMAND=user-search
 ```
 
-### Output
+This step writes:
 
-Typical generated files:
+- `accounts.json`
+- `accounts.csv`
+- `search-results.jsonl`
+- `raw/search/*.json`
+- `collect.log`
 
-- `accounts.json`: deduplicated account dataset
-- `accounts.csv`: spreadsheet-friendly version of the dataset
-- `raw/search/*.json`: raw search responses
-- `raw/posts/*.json`: raw post responses
-- `collect.log` / `enrich.log`: run logs
-- `manual_review.csv` / `manual_review.md`: human review queue
+### 2. Enrich Latest Notes
 
-### Notes
+Use the same output directory from step 1:
 
-- The scripts assume JSON-first usage of `xhs` and normalize data with `jq`.
-- Generated files under `output/` may contain account metadata and should be reviewed before sharing.
+```bash
+./2_xhs_get_user_latest_notes.sh --out-dir ./output/latest
+```
+
+Useful flags during testing:
+
+```bash
+./2_xhs_get_user_latest_notes.sh --out-dir ./output/latest --limit 20 --sleep 1
+```
+
+This step updates:
+
+- `accounts.json`
+- `accounts.csv`
+- `post-results.jsonl`
+- `raw/posts/*.json`
+- `enrich.log`
+
+### 3. Render Lines From `manual_review.csv`
+
+`3_xhs_get_comment_cmd.sh` does not create `manual_review.csv`.
+It expects that file to already exist and contain at least these columns:
+
+- `user_name`
+- `user_id`
+- `last_note_id`
+- `last_note_title`
+
+Example:
+
+```bash
+./3_xhs_get_comment_cmd.sh \
+  --input ./output/xhs_edu_run_20260311_133107/manual_review.csv \
+  --output ./output/comments.txt \
+  --prefix "YYYY" \
+  --suffix "XXXX"
+```
+
+The script also accepts `--search-dir` and can read matching `raw/search/*.json` files to append extra search metadata such as fan counts when available.
+
+Typical output line:
+
+```text
+YYYY  <note_id>  XXXX  # <user_name>  <note_title>  粉丝:<count>
+```
+
+## Output Layout
+
+Typical run directory contents:
+
+- `accounts.json`
+- `accounts.csv`
+- `accounts.source.json`
+- `search-results.jsonl`
+- `post-results.jsonl`
+- `collect.log`
+- `enrich.log`
+- `raw/search/*.json`
+- `raw/posts/*.json`
+
+Optional downstream files:
+
+- `manual_review.csv`
+- `comments.txt`
+
+## Notes
+
+- The scripts assume JSON-first usage of `xhs` and normalize data with `jq` or Python CSV parsing.
+- `3_xhs_get_comment_cmd.sh` deduplicates by `last_note_id`.
+- Search responses may report `fans_total` as `0` for many accounts; that value comes from the search API response, not from a separate profile fetch.
+- Generated files under `output/` may contain account metadata. Review them before sharing.
 - Make sure your usage complies with platform terms, privacy expectations, and your own compliance requirements.
+
+## English Summary
+
+This repo currently contains three shell scripts:
+
+1. `1_xhs_get_keyword_user_ids.sh` to search users by keyword
+2. `2_xhs_get_user_latest_notes.sh` to enrich each matched user with latest-note metadata
+3. `3_xhs_get_comment_cmd.sh` to format one line per reviewed note from an existing `manual_review.csv`
+
+The third script is an input formatter, not a review-queue generator. If you want a fully automated `manual_review.csv` builder inside the repo, add that as a separate script instead of assuming it already exists.
