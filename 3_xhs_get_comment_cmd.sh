@@ -9,8 +9,8 @@ Usage:
 Defaults:
   --input  /Users/david/dev/xhs-growth/output/latest/accounts.csv
   --output /Users/david/dev/xhs-growth/output/latest/comments.txt
-  --prefix xhs comment
-  --suffix -c hello
+  --prefix "xhs comment"
+  --suffix "-c hello"
   --search-dir /Users/david/dev/xhs-growth/output/latest/raw/search
 
 Supported input CSVs:
